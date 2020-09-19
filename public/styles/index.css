@@ -1,0 +1,28 @@
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.card {
+    flex: 0 0 200px;
+    box-sizing: border-box;
+    margin: 1rem .25em;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+}
+
+.list {
+    list-style-type: none;
+}
+
+@media screen and (min-width: 40em) {
+    .card {
+        max-width: calc(50% - 1em);
+    }
+}
+
+@media screen and (min-width: 60em) {
+    .card {
+        max-width: calc(25% - 1em);
+    }
+}
