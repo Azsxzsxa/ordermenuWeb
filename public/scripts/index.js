@@ -1,3 +1,8 @@
+var CARD_TEMPLATE =
+    '<ol class="list">' +
+    '</ol>';
+
+
 function authStateObserver(user) {
     if (user) {
         console.log("user logged");
@@ -10,7 +15,6 @@ function authStateObserver(user) {
         window.location.href = "login.html";
     }
 }
-
 
 
 function initFirebaseAuth() {
@@ -46,25 +50,31 @@ function setOrdersListener() {
                     .get().then(function(doc) {
                         if (doc.exists) {
                             _db.collection("Restaurants").doc(_restaurantId).collection("Current").doc(sectionID).collection("Tables")
-                                .onSnapshot(function(querySnapshot) {
+                                .get()
+                                .then(function(querySnapshot) {
                                     querySnapshot.forEach(function(doc) {
-                                        var tableStatus = doc.data().occupied;
-                                        if (tableStatus) {
-                                            //ADD 
-                                            console.log("table status " + tableStatus);
-                                            var tableID = doc.id;
-                                            var tableNumber = doc.data().number;
-                                            _db.collection("Restaurants").doc(_restaurantId).collection("Current").doc(sectionID).collection("Tables").doc(tableID).collection("Order").onSnapshot(function(querySnapshot) {
-                                                querySnapshot.forEach(function(doc) {
-                                                    console.log(sectionName + " " + tableNumber + " " + doc.data().name);
-                                                });
-                                            })
+                                        var tableId = doc.id;
+                                        var tableNumber = doc.data().number;
 
-                                        } else {
-                                            console.log("table status " + tableStatus);
-                                        }
+                                        _db.collection("Restaurants").doc(_restaurantId).collection("Current").doc(sectionID).collection("Tables").doc(tableId).collection("Order").onSnapshot(function(querySnapshot) {
+
+                                            var listParent = document.getElementById(tableId);
+                                            if (listParent != null) {
+                                                while (listParent.firstChild) {
+                                                    listParent.removeChild(listParent.firstChild);
+                                                }
+                                            }
+                                            querySnapshot.forEach(function(doc) {
+                                                addCard(tableId);
+                                                console.log(sectionName + " " + tableNumber + " " + doc.data().name);
+                                                populateCard(tableId, doc.data());
+                                            });
+                                            if (listParent != null && !listParent.firstChild) {
+                                                _orderContainer.removeChild(document.getElementById("card" + tableId));
+                                            }
+                                        })
+
                                     });
-                                    // console.log("Current cities in CA: ", cities.join(", "));
                                 });
                         } else {
                             // doc.data() will be undefined in this case
@@ -84,6 +94,33 @@ function setOrdersListener() {
 var _userUid;
 var _db;
 var _restaurantId;
+var _orderContainer = document.getElementById("container");
 
 
+function addCard(tableId) {
+    var exists = document.getElementById("card" + tableId);
+    if (exists == null) {
+        const newCard = document.createElement('article');
+        newCard.classList.add('card');
+        newCard.id = "card" + tableId;
+        newCard.innerHTML = CARD_TEMPLATE;
+        newCard.querySelector('.list').id = tableId;
+        console.log(newCard);
+        _orderContainer.appendChild(newCard);
+    }
+
+    // populateCard(ref);
+
+}
+
+function populateCard(tableId, data) {
+    var node = document.createElement("LI");
+    var textnode = document.createTextNode(data.quantity + " " + data.name);
+    node.appendChild(textnode);
+    document.getElementById(tableId).appendChild(node);
+
+}
+
+
+// test();
 initFirebaseAuth();
