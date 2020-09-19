@@ -42,37 +42,47 @@ function setOrdersListener() {
     _db.collection("Restaurants").doc(_restaurantId).collection("Current").get()
         .then(function(querySnapshot) {
             querySnapshot.forEach(function(doc) {
-                // doc.data() is never undefined for query doc snapshots
-                console.log("sections ref: " + doc.id);
                 var sectionID = doc.id;
                 var sectionName = doc.data().name;
                 _db.collection("Restaurants").doc(_restaurantId).collection("Current").doc(sectionID)
                     .get().then(function(doc) {
                         if (doc.exists) {
                             _db.collection("Restaurants").doc(_restaurantId).collection("Current").doc(sectionID).collection("Tables")
-                                .get()
-                                .then(function(querySnapshot) {
+                                .onSnapshot(function(querySnapshot) {
                                     querySnapshot.forEach(function(doc) {
                                         var tableId = doc.id;
                                         var tableNumber = doc.data().number;
+                                        var tableOccupied = doc.data().occupied;
 
-                                        _db.collection("Restaurants").doc(_restaurantId).collection("Current").doc(sectionID).collection("Tables").doc(tableId).collection("Order").onSnapshot(function(querySnapshot) {
+                                        switch (tableOccupied) {
+                                            case "ready":
+                                                deleteCard(tableId);
+                                                break;
+                                            case "free":
+                                                deleteCard(tableId);
+                                                break;
+                                            case "busy":
+                                                addListener(sectionID, tableId);
+                                                break;
+                                        }
 
-                                            var listParent = document.getElementById(tableId);
-                                            if (listParent != null) {
-                                                while (listParent.firstChild) {
-                                                    listParent.removeChild(listParent.firstChild);
-                                                }
-                                            }
-                                            querySnapshot.forEach(function(doc) {
-                                                addCard(tableId);
-                                                console.log(sectionName + " " + tableNumber + " " + doc.data().name);
-                                                populateCard(tableId, doc.data());
-                                            });
-                                            if (listParent != null && !listParent.firstChild) {
-                                                _orderContainer.removeChild(document.getElementById("card" + tableId));
-                                            }
-                                        })
+                                        // _db.collection("Restaurants").doc(_restaurantId).collection("Current").doc(sectionID).collection("Tables").doc(tableId).collection("Order").onSnapshot(function(querySnapshot) {
+
+                                        //     var listParent = document.getElementById(tableId);
+                                        //     if (listParent != null) {
+                                        //         while (listParent.firstChild) {
+                                        //             listParent.removeChild(listParent.firstChild);
+                                        //         }
+                                        //     }
+                                        //     querySnapshot.forEach(function(doc) {
+                                        //         addCard(tableId);
+                                        //         console.log(sectionName + " " + tableNumber + " " + doc.data().name);
+                                        //         populateCard(tableId, doc.data());
+                                        //     });
+                                        //     if (listParent != null && !listParent.firstChild) {
+                                        //         _orderContainer.removeChild(document.getElementById("card" + tableId));
+                                        //     }
+                                        // })
 
                                     });
                                 });
@@ -95,6 +105,32 @@ var _userUid;
 var _db;
 var _restaurantId;
 var _orderContainer = document.getElementById("container");
+
+function deleteCard(tableId) {
+    var listParent = document.getElementById(tableId);
+    if (listParent != null) {
+        while (listParent.firstChild) {
+            listParent.removeChild(listParent.firstChild);
+        }
+        _orderContainer.removeChild(document.getElementById("card" + tableId));
+    }
+}
+
+function addListener(sectionID, tableId) {
+    _db.collection("Restaurants").doc(_restaurantId).collection("Current").doc(sectionID).collection("Tables").doc(tableId).collection("Order").onSnapshot(function(querySnapshot) {
+
+        var listParent = document.getElementById(tableId);
+        if (listParent != null) {
+            while (listParent.firstChild) {
+                listParent.removeChild(listParent.firstChild);
+            }
+        }
+        querySnapshot.forEach(function(doc) {
+            addCard(tableId);
+            populateCard(tableId, doc.data());
+        });
+    })
+}
 
 
 function addCard(tableId) {
