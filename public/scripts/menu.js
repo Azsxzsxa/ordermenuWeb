@@ -22,15 +22,12 @@ function initFirebaseAuth() {
 
 function getMenu() {
     _db.collection("Restaurants").doc(_restaurantId).collection("Menu").orderBy("name", "asc")
-        .get()
-        .then(function(querySnapshot) {
+        .onSnapshot(function(querySnapshot) {
+            $("#menuContainer").empty();
+
             querySnapshot.forEach(function(doc) {
                 addCard(doc.id, doc.data());
-
             });
-        })
-        .catch(function(error) {
-            console.log("Error getting documents: ", error);
         });
 }
 
@@ -132,9 +129,9 @@ $("#modal-Save").click(function() {
             available: true
         })
         .then(function() {
-            console.log("Document successfully written!");
+            $("#modal-Save-Status").text("Successful");
         })
         .catch(function(error) {
-            console.error("Error writing document: ", error);
+            $("#modal-Save-Status").text(error);
         });
 });
