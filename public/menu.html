@@ -25,7 +25,25 @@
         <!-- Modal content -->
         <div class="modal-content">
             <span class="close">&times;</span>
-            <p id="modal-text">Some text in the Modal..</p>
+            <a class="menuItemRow">
+                <article class="menuItemColumn">
+                    <p type="text" class="menuItemName menuItemLine">name</p>
+                    <input type="text" id="modal-Name" class="menuItemValue menuItemLine"></input>
+                </article>
+                <article class="menuItemColumn">
+                    <p class="menuItemName menuItemLine">category</p>
+                    <!-- <input type="text" id="modal-Category" class="menuItemValue menuItemLine"></input> -->
+                    <select id="modal-Category" name="categories">
+                        
+                      </select>
+                </article>
+                <article class="menuItemColumn">
+                    <p class="menuItemName menuItemLine">price</p>
+                    <input type="text" id="modal-Price" class="menuItemValue menuItemLine"></input>
+                </article>
+
+            </a>
+            <button id="modal-Save">save</button>
         </div>
 
     </div>
@@ -33,8 +51,6 @@
     <div class="centered">
 
         <section id="menuContainer" class="cards">
-
-
 
         </section>
     </div>
