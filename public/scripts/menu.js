@@ -35,7 +35,7 @@ function getMenu() {
 }
 
 function addCard(docId, data) {
-    let infoContainer = document.createElement('article');
+    let infoContainer = document.createElement('a');
     infoContainer.id = docId;
     infoContainer.classList.add("menuItemRow")
 
@@ -44,7 +44,6 @@ function addCard(docId, data) {
     nameCard.classList.add("menuItemColumn")
     nameCard.querySelector('.menuItemValue').innerHTML = data.name;
     nameCard.querySelector('.menuItemName').innerHTML = "name";
-    console.log(nameCard);
     infoContainer.appendChild(nameCard);
 
     const categoryCard = document.createElement('article');
@@ -52,7 +51,6 @@ function addCard(docId, data) {
     categoryCard.classList.add("menuItemColumn")
     categoryCard.querySelector('.menuItemValue').innerHTML = data.category;
     categoryCard.querySelector('.menuItemName').innerHTML = "category";
-    console.log(categoryCard);
     infoContainer.appendChild(categoryCard);
 
     const priceCard = document.createElement('article');
@@ -60,10 +58,13 @@ function addCard(docId, data) {
     priceCard.classList.add("menuItemColumn")
     priceCard.querySelector('.menuItemValue').innerHTML = data.price;
     priceCard.querySelector('.menuItemName').innerHTML = "price";
-    console.log(priceCard);
     infoContainer.appendChild(priceCard);
 
     _menuContainer.appendChild(infoContainer);
+    infoContainer.onclick = function() {
+        $("#modal-text").html(data.name);
+        $("#modal-Popup").css("display", "block");
+    };
 
 
 }
@@ -84,8 +85,18 @@ function getRestaurant() {
         });
 }
 
+function editTask() {
+    $("#modal-Popup").css("display", "block");
+}
+
 let _userUid;
 let _db;
 let _restaurantId;
 let _menuContainer = document.getElementById("menuContainer");
+
 initFirebaseAuth();
+
+var span = document.getElementsByClassName("close")[0];
+span.onclick = function() {
+    $("#modal-Popup").css("display", "none");
+}
