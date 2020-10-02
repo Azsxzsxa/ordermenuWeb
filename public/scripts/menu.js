@@ -57,6 +57,13 @@ function addCard(docId, data) {
     priceCard.querySelector('.menuItemName').innerHTML = "price";
     infoContainer.appendChild(priceCard);
 
+    const availableCard = document.createElement('article');
+    availableCard.innerHTML = CARD_TEMPLATE;
+    availableCard.classList.add("menuItemColumn")
+    availableCard.querySelector('.menuItemValue').innerHTML = data.available;
+    availableCard.querySelector('.menuItemName').innerHTML = "available";
+    infoContainer.appendChild(availableCard);
+
     _menuContainer.appendChild(infoContainer);
     infoContainer.onclick = function() {
         $("#modal-Popup").css("display", "block");
@@ -65,6 +72,15 @@ function addCard(docId, data) {
         $("#modal-Price").val(data.price);
         _menuItemId = docId;
 
+
+        $("#modal-Available").empty();
+        $("#modal-Available").append(`<option class="dropdown-Item" value="${data.available}" selected>${data.available}</option>`)
+
+        if (data.available) {
+            $("#modal-Available").append(`<option class="dropdown-Item" value="false">false</option>`)
+        } else {
+            $("#modal-Available").append(`<option class="dropdown-Item" value="true">true</option>`)
+        }
         _db.collection("Restaurants").doc(_restaurantId).get().then(function(doc) {
             if (doc.exists) {
                 $("#modal-Category").empty();
@@ -118,20 +134,57 @@ initFirebaseAuth();
 
 $(".close").click(function() {
     $("#modal-Popup").css("display", "none");
+    $("#modal-Save-Status").css("display", "none");
 });
 
 $("#modal-Save").click(function() {
-    _db.collection("Restaurants").doc(_restaurantId).collection("Menu").doc(_menuItemId).set({
+    let itemId;
+    if (_menuItemId) {
+        itemId = _menuItemId;
+    } else {
+        let ref = _db.collection("Restaurants").doc(_restaurantId).collection("Menu").doc()
+        itemId = ref.id;
+    }
+    _db.collection("Restaurants").doc(_restaurantId).collection("Menu").doc(itemId).set({
             name: $("#modal-Name").val(),
             category: $("#modal-Category").val(),
             price: parseInt($("#modal-Price").val()),
-            document_id: _menuItemId,
-            available: true
+            document_id: itemId,
+            available: ($("#modal-Available").val() == 'true')
         })
         .then(function() {
+            $("#modal-Save-Status").css("display", "block");
             $("#modal-Save-Status").text("Successful");
         })
         .catch(function(error) {
             $("#modal-Save-Status").text(error);
         });
+
+});
+
+$(".buttonAddItem").click(function() {
+    _menuItemId = "";
+    console.log("hello");
+    $("#modal-Popup").css("display", "block");
+
+    _db.collection("Restaurants").doc(_restaurantId).get().then(function(doc) {
+        if (doc.exists) {
+            $("#modal-Category").empty();
+            doc.data().menuCategories.forEach(element => {
+                // let n = data.category.localeCompare(element);
+                // if (n == 0) {
+                //     $("#modal-Category").append(`<option class="dropdown-Item" value="${element}" selected>${element}</option>`)
+                // } else {
+                $("#modal-Category").append(`<option class="dropdown-Item" value="${element}">${element}</option>`)
+                    // }
+
+            })
+
+        } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+        }
+    }).catch(function(error) {
+        console.log("Error getting document:", error);
+    });
 });
