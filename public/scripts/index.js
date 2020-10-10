@@ -1,6 +1,8 @@
 var CARD_TEMPLATE =
+    '<div>' +
     '<p class="section"></p>' +
     '<p class="table"></p>' +
+    '</div>' +
     '<ol class="list">' +
     '</ol>';
 
@@ -25,7 +27,7 @@ function initFirebaseAuth() {
 }
 
 function getRestaurant() {
-    _db.collection("Restaurants").where("employees", "array-contains", _userUid)
+    _db.collection(RESTAURANTS).where("employees", "array-contains", _userUid)
         .get()
         .then(function(querySnapshot) {
             querySnapshot.forEach(function(doc) {
@@ -41,15 +43,15 @@ function getRestaurant() {
 }
 
 function setOrdersListener() {
-    _db.collection("Restaurants").doc(_restaurantId).collection("Current").get()
+    _db.collection(RESTAURANTS).doc(_restaurantId).collection(CURRENT).get()
         .then(function(querySnapshot) {
             querySnapshot.forEach(function(doc) {
                 var sectionID = doc.id;
                 var sectionName = doc.data().name;
-                _db.collection("Restaurants").doc(_restaurantId).collection("Current").doc(sectionID)
+                _db.collection(RESTAURANTS).doc(_restaurantId).collection(CURRENT).doc(sectionID)
                     .get().then(function(doc) {
                         if (doc.exists) {
-                            _db.collection("Restaurants").doc(_restaurantId).collection("Current").doc(sectionID).collection("Tables")
+                            _db.collection(RESTAURANTS).doc(_restaurantId).collection(CURRENT).doc(sectionID).collection(TABLES)
                                 .onSnapshot(function(querySnapshot) {
                                     querySnapshot.forEach(function(doc) {
                                         var tableId = doc.id;
@@ -57,13 +59,13 @@ function setOrdersListener() {
                                         var tableOccupied = doc.data().occupied;
 
                                         switch (tableOccupied) {
-                                            case "ready":
+                                            case TABLE_STATUS_SERVED:
                                                 deleteCard(tableId);
                                                 break;
-                                            case "free":
+                                            case TABLE_STATUS_FREE:
                                                 deleteCard(tableId);
                                                 break;
-                                            case "busy":
+                                            case TABLE_STATUS_BUSY:
                                                 addListener(sectionID, tableId, sectionName, tableNumber);
                                                 break;
                                         }
@@ -101,7 +103,7 @@ function deleteCard(tableId) {
 }
 
 function addListener(sectionID, tableId, sectionName, tableNumber) {
-    _db.collection("Restaurants").doc(_restaurantId).collection("Current").doc(sectionID).collection("Tables").doc(tableId).collection("Order").onSnapshot(function(querySnapshot) {
+    _db.collection(RESTAURANTS).doc(_restaurantId).collection(CURRENT).doc(sectionID).collection(TABLES).doc(tableId).collection(IN_PROGRESS).onSnapshot(function(querySnapshot) {
 
         var listParent = document.getElementById(tableId);
         if (listParent != null) {
@@ -110,8 +112,11 @@ function addListener(sectionID, tableId, sectionName, tableNumber) {
             }
         }
         querySnapshot.forEach(function(doc) {
+            // n = doc.data().status.localeCompare('served');
+            // if (n != 0) {
             addCard(tableId, sectionName, tableNumber);
             populateCard(tableId, doc.data());
+            // }
         });
     })
 }
@@ -131,18 +136,27 @@ function addCard(tableId, sectionName, tableNumber) {
         _orderContainer.appendChild(newCard);
     }
 
-    // populateCard(ref);
-
 }
 
 function populateCard(tableId, data) {
+
     var node = document.createElement("LI");
     var textnode = document.createTextNode(data.quantity + " " + data.name);
+    let n = data.status.localeCompare('modified');
+    if (n == 0) {
+        node.classList.add('itemModified');
+    }
+    n = data.status.localeCompare('canceled');
+    if (n == 0) {
+        node.classList.add('itemCanceled');
+    }
+
+
     node.appendChild(textnode);
     document.getElementById(tableId).appendChild(node);
+
 
 }
 
 
-// test();
 initFirebaseAuth();

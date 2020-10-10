@@ -150,7 +150,8 @@ $("#modal-Save").click(function() {
             category: $("#modal-Category").val(),
             price: parseInt($("#modal-Price").val()),
             document_id: itemId,
-            available: ($("#modal-Available").val() == 'true')
+            available: ($("#modal-Available").val() == 'true'),
+            status: "Default"
         })
         .then(function() {
             $("#modal-Save-Status").css("display", "block");
@@ -166,22 +167,18 @@ $(".buttonAddItem").click(function() {
     _menuItemId = "";
     console.log("hello");
     $("#modal-Popup").css("display", "block");
+    $("#modal-Name").val('');
+    $("#modal-Price").val('');
 
     _db.collection("Restaurants").doc(_restaurantId).get().then(function(doc) {
         if (doc.exists) {
             $("#modal-Category").empty();
             doc.data().menuCategories.forEach(element => {
-                // let n = data.category.localeCompare(element);
-                // if (n == 0) {
-                //     $("#modal-Category").append(`<option class="dropdown-Item" value="${element}" selected>${element}</option>`)
-                // } else {
                 $("#modal-Category").append(`<option class="dropdown-Item" value="${element}">${element}</option>`)
-                    // }
 
             })
 
         } else {
-            // doc.data() will be undefined in this case
             console.log("No such document!");
         }
     }).catch(function(error) {

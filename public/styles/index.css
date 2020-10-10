@@ -4,6 +4,9 @@
 }
 
 .card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     flex: 0 0 200px;
     box-sizing: border-box;
     margin: 1rem .25em;
@@ -13,6 +16,16 @@
 
 .list {
     list-style-type: none;
+    padding: 0;
+}
+
+.itemModified {
+    background-color: #629d62;
+    ;
+}
+
+.itemCanceled {
+    background-color: #ff4d4d
 }
 
 @media screen and (min-width: 40em) {
